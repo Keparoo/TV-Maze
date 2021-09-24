@@ -45,8 +45,6 @@ function populateShows(shows) {
   const $showsList = $("#shows-list");
   $showsList.empty();
 
-
-  
   let image;
   for (let show of shows) {
 
@@ -80,7 +78,7 @@ function populateEpisodes(episodes) {
 
     for (let episode of episodes) {
         let $item = $(
-            `<li>${episode.name}</li>
+            `<li>${episode.name} (season ${episode.season}, number ${episode.number})</li>
         `);
       $episodesList.append($item)
     }
@@ -106,8 +104,10 @@ $("#search-form").on("submit", async function handleSearch (evt) {
   populateShows(shows);
 });
 
-$("#shows-list").on("click", "button", function () {
-    //handle episodes
+$("#shows-list").on("click", "button", async function (e) {
+    const episodes = await getEpisodes(e.target.parentElement.parentElement.dataset.showId)
+    $("#episodes-area").show();
+    populateEpisodes(episodes)
 })
 
 
