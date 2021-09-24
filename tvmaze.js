@@ -5,7 +5,6 @@
 // Return a list of objects. Each object representing a matching show and containing id, name, summary, and image 
 async function searchShows(query) {
     res = await axios.get('http://api.tvmaze.com/search/shows', {params: {q :query}})
-    console.log(res.data)
     return res.data
 }
 
@@ -79,7 +78,5 @@ $("#shows-list").on("click", "button", async function (e) {
 // Given a show ID, return a list of episodes conaining id, name, season and number
 async function getEpisodes(id) {
   res = await axios.get(`http://api.tvmaze.com/shows/${id}/episodes`)
-
-  console.log(res.data)
   return res.data
 }
