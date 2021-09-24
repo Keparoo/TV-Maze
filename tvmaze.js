@@ -61,26 +61,6 @@ function populateEpisodes(episodes) {
     $("#episodes-area").show();
 }
 
-// Get search term from form, hide episode area, get a list of matching shows and populate DOM
-$("#search-form").on("submit", async function handleSearch (evt) {
-  evt.preventDefault();
-
-  let query = $("#search-query").val();
-  if (!query) return;
-
-  $("#episodes-area").hide();
-
-  let shows = await searchShows(query);
-
-  populateShows(shows);
-});
-
-$("#shows-list").on("click", "button", async function (e) {
-    let showId = e.target.parentElement.parentElement.dataset.showId
-    const episodes = await getEpisodes(showId)
-    populateEpisodes(episodes)
-})
-
 // Given a show ID, return a list of episodes containing id, name, season and episode number
 async function getEpisodes(id) {
   res = await axios.get(`http://api.tvmaze.com/shows/${id}/episodes`)
@@ -95,3 +75,24 @@ async function getEpisodes(id) {
   })
   return episodes
 }
+
+// Get search term from form, hide episode area, get a list of matching shows and populate DOM
+$("#search-form").on("submit", async function handleSearch (evt) {
+    evt.preventDefault();
+  
+    let query = $("#search-query").val();
+    if (!query) return;
+  
+    $("#episodes-area").hide();
+  
+    let shows = await searchShows(query);
+  
+    populateShows(shows);
+  });
+
+  // Listen for button click to display episodes
+  $("#shows-list").on("click", "button", async function (e) {
+    let showId = e.target.parentElement.parentElement.dataset.showId
+    const episodes = await getEpisodes(showId)
+    populateEpisodes(episodes)
+})
