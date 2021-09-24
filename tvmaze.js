@@ -2,10 +2,23 @@
 *
 */
 
+const MISSING_IMAGE_URL = 'https://tinyurl.com/tv-missing'
+
 // Return a list of objects. Each object representing a matching show and containing id, name, summary, and image 
 async function searchShows(query) {
     res = await axios.get('http://api.tvmaze.com/search/shows', {params: {q :query}})
-    return res.data
+
+    let shows = res.data.map(item => {
+        return {
+            id: item.show.id,
+            name: item.show.name,
+            summary: item.show.summary,
+            // image: item.show.image
+            image: item.show.image ? item.show.image.medium : MISSING_IMAGE_URL
+        }
+    })
+
+    return shows
 }
 
 // Given a list of show objects add the shows to the DOM
@@ -16,20 +29,13 @@ function populateShows(shows) {
   let image;
   for (let show of shows) {
 
-    // Handle no image returned
-    try {
-        image = show.show.image.medium
-    } catch {
-        image = 'https://tinyurl.com/tv-missing'
-    }
-
     let $item = $(
-      `<div class="col-md-6 col-lg-3 Show" data-show-id="${show.show.id}">
-         <div class="card" data-show-id="${show.show.id}">
+      `<div class="col-md-6 col-lg-3 Show" data-show-id="${show.id}">
+         <div class="card" data-show-id="${show.id}">
            <div class="card-body">
-           <img class="card-img-top" src="${image}">
-             <h5 class="card-title">${show.show.name}</h5>
-             <p class="card-text">${show.show.summary}</p>
+           <img class="card-img-top" src="${show.image}">
+             <h5 class="card-title">${show.name}</h5>
+             <p class="card-text">${show.summary}</p>
              <button id="episodes">Episodes</button>
            </div>
          </div>
@@ -52,7 +58,7 @@ function populateEpisodes(episodes) {
     //   $episodesList.append($item) //Vanilla JS way
       $episodesList.after($item)
     }
-
+    $("#episodes-area").show();
 }
 
 // Get search term from form, hide episode area, get a list of matching shows and populate DOM
@@ -70,13 +76,22 @@ $("#search-form").on("submit", async function handleSearch (evt) {
 });
 
 $("#shows-list").on("click", "button", async function (e) {
-    const episodes = await getEpisodes(e.target.parentElement.parentElement.dataset.showId)
-    $("#episodes-area").show();
+    let showId = e.target.parentElement.parentElement.dataset.showId
+    const episodes = await getEpisodes(showId)
     populateEpisodes(episodes)
 })
 
-// Given a show ID, return a list of episodes conaining id, name, season and number
+// Given a show ID, return a list of episodes containing id, name, season and episode number
 async function getEpisodes(id) {
   res = await axios.get(`http://api.tvmaze.com/shows/${id}/episodes`)
-  return res.data
+
+  let episodes = res.data.map(episode => {
+      return {
+          id: episode.id,
+          name: episode.name,
+          season: episode.season,
+          number: episode.number
+      }
+  })
+  return episodes
 }
